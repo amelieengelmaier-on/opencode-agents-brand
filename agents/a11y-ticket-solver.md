@@ -54,22 +54,26 @@ Follow these phases in order. Each phase delegates to a skill where noted. Never
 ### Phase 1: Deep Codebase Discovery
 
 1. Check for `.opencode/automation_state.md`. If missing, initialize it.
-2. **Locate the target component** using `grep`/`glob` on the file or component name from the ticket.
-3. **Trace the full component tree.** Starting from the target component:
+2. **Load Copilot instructions.** Read the repo's coding standards so every change you make is consistent:
+   - Read `.github/copilot-instructions.md` (root-level conventions: architecture, TypeScript rules, file naming, git workflow, key commands).
+   - Read **all** scoped instruction files in `.github/instructions/` (e.g., `vue.instructions.md`, `scss.instructions.md`, `testing.instructions.md`, `graphql.instructions.md`, `nx.instructions.md`). Each file's frontmatter `applyTo` glob tells you which file types it covers — internalize them accordingly.
+   - Treat these instructions as **mandatory constraints** on par with the strategic directives in this agent. If a Copilot instruction conflicts with this agent's rules, this agent's rules win; otherwise follow both.
+3. **Locate the target component** using `grep`/`glob` on the file or component name from the ticket.
+4. **Trace the full component tree.** Starting from the target component:
    - Identify its **parent components** (who renders it and with what props).
    - Identify its **child components** (what it renders internally).
    - Check if the component is **shared** (`shared/on-ui`) or **app-specific** (`apps/on-shop`). If shared, note that changes affect ALL consumers — this is a blast-radius concern.
-4. **Trace the data flow.** For the data relevant to the fix:
+5. **Trace the data flow.** For the data relevant to the fix:
    - Where does it originate? (Contentful CMS, API, hardcoded, composable, prop)
    - What is the pipeline? (GraphQL fragment -> composable -> transform function -> component prop)
    - Is the data the fix needs already available somewhere in the pipeline but being dropped before it reaches the component? Check transform functions and composable return values.
    - Key locations: `shared/on-store/src/api/_fragments/` for GraphQL fragments, `apps/on-shop/composables/` for data composables.
-5. **Find related files:**
+6. **Find related files:**
    - Existing tests: `*.spec.ts` and `*.accessibility.spec.ts` alongside the component.
    - Stories: `*.stories.ts` alongside the component.
    - Type definitions: `models.ts` or `types.ts` in the component folder.
    - Style files: `*.scss` in the component folder.
-6. **Check for existing a11y patterns** that the fix should reuse (see the `on-frontend-codebase-reference` skill for the full inventory — `BaseImage` decorative pattern, `srOnly` class, aria-label prop conventions, etc.).
+7. **Check for existing a11y patterns** that the fix should reuse (see the `on-frontend-codebase-reference` skill for the full inventory — `BaseImage` decorative pattern, `srOnly` class, aria-label prop conventions, etc.).
 
 ### Phase 2: Analysis & Planning
 
